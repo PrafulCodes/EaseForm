@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Utilities */
+.gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-brand-500 to-blue-600;
+}

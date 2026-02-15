@@ -1,0 +1,19 @@
+{
+  "name": "easeform-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for EaseForm",
+  "scripts": {
+    "build": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify && node ../generate-config.js",
+    "watch": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "dev": "npm run watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "cssnano": "^6.0.3"
+  }
+}

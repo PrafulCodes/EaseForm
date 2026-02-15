@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>CORS Configuration Test</h1>
+    <p>Testing CORS from <strong>http://localhost:8080</strong> to <strong>http://localhost:8000</strong></p>
+
+    <button onclick="testCORS()">Test CORS</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function testCORS() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">Testing...</div>';
+
+            try {
+                // Test 1: Simple GET request
+                console.log('Testing GET /health...');
+                const healthResponse = await fetch('http://localhost:8000/health');
+                const healthData = await healthResponse.json();
+
+                console.log('Health check response:', healthData);
+
+                // Test 2: POST request (this is what's failing)
+                console.log('Testing POST /api/forms...');
+                const formResponse = await fetch('http://localhost:8000/api/forms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: 'Test Form',
+                        description: 'Testing CORS',
+                        questions: []
+                    })
+                });
+
+                console.log('Form POST response status:', formResponse.status);
+                const formData = await formResponse.json();
+                console.log('Form POST response data:', formData);
+
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>✅ CORS is working!</h3>
+                        <p><strong>Health Check:</strong> ${JSON.stringify(healthData, null, 2)}</p>
+                        <p><strong>Form POST Status:</strong> ${formResponse.status}</p>
+                        <p><strong>Form POST Response:</strong> ${JSON.stringify(formData, null, 2)}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('CORS test failed:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ CORS Error</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Details:</strong> ${error.stack || 'No stack trace'}</p>
+                        <p>Check the browser console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+
+</html>

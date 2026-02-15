@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responses - EaseForm</title>
+    <meta name="description" content="View and analyze form responses - EaseForm">
+
+    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
+    <link href="/dist/output.css" rel="stylesheet">
+
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Core Utilities -->
+    <script src="../config.js"></script>
+    <script src="../utils/logger.js"></script>
+    <script src="../utils/cache.js"></script>
+    <script src="../utils/auth.js"></script>
+    <script src="../utils/api.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Tab active state */
+        .tab-active {
+            border-bottom: 2px solid #6366f1;
+            color: #6366f1;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Authentication will be checked on page load via JavaScript -->
+
+    <!-- Fixed Header -->
+    <header class="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Left Side -->
+                <div class="flex items-center space-x-4">
+                    <!-- Logo -->
+                    <a href="/dashboard/" class="group flex items-center gap-1">
+                        <span
+                            class="text-xl font-bold tracking-tight text-gray-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-600 transition-all duration-300">Ease</span>
+                        <span
+                            class="text-xl font-bold tracking-tight text-indigo-600 group-hover:text-gray-900 transition-colors duration-300">Form</span>
+                        <div class="h-1.5 w-1.5 rounded-full bg-indigo-600 mb-1 animate-pulse"></div>
+                    </a>
+                    <span class="text-gray-300">|</span>
+                    <!-- Back to Dashboard -->
+                    <a href="/dashboard/" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+                </div>
+
+                <!-- Right Side - Form Title and Status -->
+                <div class="flex items-center space-x-3">
+                    <h1 id="form-title" class="text-base font-semibold text-gray-900 hidden sm:block">Loading...</h1>
+                    <span id="form-status"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Loading
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Overview Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Total Responses -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 p-3 bg-indigo-100 rounded-lg">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Responses</p>
+                            <p id="total-responses" class="text-2xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unique Devices -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 p-3 bg-green-100 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Unique Devices</p>
+                            <p id="unique-devices" class="text-2xl font-bold text-gray-900">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Last Response -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 p-3 bg-blue-100 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Last Response</p>
+                            <p id="last-response" class="text-base font-semibold text-gray-900">Never</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="bg-white rounded-t-lg shadow-sm border border-gray-200 border-b-0">
+                <div class="flex space-x-8 px-6">
+                    <div class="py-4 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600">
+                        Individual Responses
+                    </div>
+                    <div
+                        class="py-4 text-xs font-medium text-gray-400 border-b-2 border-transparent cursor-not-allowed select-none opacity-60 flex flex-col justify-center">
+                        <span>Summary</span>
+                        <span class="text-[10px] leading-tight mt-0.5">Coming in next update</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Individual Responses (Always Visible) -->
+            <div id="individual-view" class="bg-white rounded-b-lg shadow-sm border border-gray-200 p-6">
+
+                <!-- Controls Bar -->
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-gray-200">
+                    <div class="flex items-center space-x-3">
+                        <!-- Search Input -->
+                        <div class="relative">
+                            <input type="text" placeholder="Search responses..."
+                                class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                            <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Export Button -->
+                    <button
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export CSV
+                    </button>
+                </div>
+
+                <!-- Responses Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Response #
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Submitted
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="responses-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Responses will be loaded here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+                    <p id="pagination-info" class="text-sm text-gray-600">
+                        No responses
+                    </p>
+                    <div class="flex space-x-2">
+                        <button
+                            class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                            disabled>
+                            Previous
+                        </button>
+                        <button class="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700">
+                            1
+                        </button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+                            2
+                        </button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+                            3
+                        </button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (Hidden by default - shown when no responses) -->
+            <div id="empty-state" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-6">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-3">No responses yet</h2>
+                <p class="text-base text-gray-600 mb-8 max-w-md mx-auto">
+                    Share your form to start collecting responses. Your anonymous responses will appear here.
+                </p>
+                <button
+                    class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy Form Link
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">
+                EaseForm - Privacy-first forms ·
+                <a href="#" class="text-indigo-600 hover:text-indigo-700 ml-1">Help</a> ·
+                <a href="#" class="text-indigo-600 hover:text-indigo-700 ml-1">Privacy</a>
+            </p>
+        </div>
+    </footer>
+
+
+    <!-- Response Details Modal -->
+    <div id="response-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+                onclick="closeResponseModal()"></div>
+
+            <!-- Modal panel -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <!-- Modal header -->
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        Response Details
+                    </h3>
+                    <button type="button" onclick="closeResponseModal()"
+                        class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto"
+                    id="response-modal-content">
+                    <!-- Content will be injected here -->
+                    <div class="animate-pulse space-y-4">
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div class="space-y-2">
+                            <div class="h-4 bg-gray-200 rounded"></div>
+                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeResponseModal()"
+                        class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Cache Utility -->
+    <script src="../utils/cache.js"></script>
+
+    <!-- API Service -->
+    <script src="../utils/api.js"></script>
+
+    <script>
+        // ============================================
+        // USE SHARED SUPABASE CLIENT
+        // ============================================
+        var supabaseClient = window.supabaseClient;
+
+        if (!supabaseClient) {
+            window.Logger.error('App', 'Supabase client not initialized. Check config.js');
+        }
+
+        // ============================================
+        // EXTRACT FORM ID FROM URL
+        // ============================================
+        function getFormIdFromURL() {
+            var params = new URLSearchParams(window.location.search);
+            return params.get('form_id');
+        }
+
+        // ============================================
+        // GLOBAL DATA STORE
+        // ============================================
+        window.currentFormData = null;
+        window.responsesData = [];
+
+        // ============================================
+        // LOAD FORM DETAILS
+        // ============================================
+        // ============================================
+        // LOAD FORM DETAILS (WITH CACHING)
+        // ============================================
+        async function loadFormDetails(formId) {
+            window.Logger.info('Responses', 'Loading form details', formId);
+
+            try {
+                // API handles caching internally
+                var form = await window.API.forms.get(formId, function (freshForm) {
+                    window.Logger.debug('SWR', 'Updating form details', freshForm ? freshForm.id : 'unknown');
+                    updateFormDetailsUI(freshForm);
+                });
+
+                window.Logger.info('Responses', 'Form details loaded');
+
+                updateFormDetailsUI(form);
+                return form;
+            } catch (error) {
+                window.Logger.error('Responses', 'Error loading form details', error);
+                throw error;
+            }
+        }
+
+        function updateFormDetailsUI(form) {
+            // Store for later use (mapping question IDs to text)
+            window.currentFormData = form;
+
+            // Update header
+            document.getElementById('form-title').textContent = form.title;
+
+            // Update status badge
+            var statusBadge = document.getElementById('form-status');
+            if (form.is_active) {
+                statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                statusBadge.textContent = 'Active';
+            } else {
+                statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
+                statusBadge.textContent = 'Closed';
+            }
+        }
+
+        // ============================================
+        // LOAD RESPONSES
+        // ============================================
+        // ============================================
+        // LOAD RESPONSES (WITH CACHING)
+        // ============================================
+        async function loadResponses(formId) {
+            window.Logger.info('Responses', 'Loading responses', formId);
+
+            try {
+                // API handles caching internally
+                var responses = await window.API.responses.list(formId, function (freshResponses) {
+                    window.Logger.debug('SWR', 'Updating responses list');
+                    displayResponses(freshResponses);
+                });
+
+                window.Logger.info('Responses', 'Responses loaded', responses.length);
+
+                displayResponses(responses);
+
+            } catch (error) {
+                window.Logger.error('Responses', 'Error loading responses', error);
+                showError('Failed to load responses: ' + (error.message || 'Unknown error'));
+            }
+        }
+
+        function displayResponses(responses) {
+            // Store for details view
+            window.responsesData = responses;
+
+            if (!responses || responses.length === 0) {
+                window.Logger.info('Responses', 'No responses found');
+                showEmptyState();
+                return;
+            }
+
+            window.Logger.debug('Responses', 'Rendering responses', responses.length);
+
+            // Update stats cards
+            updateStats(responses);
+
+            // Render individual responses table
+            renderResponses(responses);
+
+            // Ensure individual view is visible
+            document.getElementById('individual-view').classList.remove('hidden');
+            // Ensure empty state is hidden
+            document.getElementById('empty-state').classList.add('hidden');
+
+            window.Logger.debug('Responses', 'All responses rendered');
+        }
+
+
+
+        // ============================================
+        // UPDATE STATS
+        // ============================================
+        function updateStats(responses) {
+            // Total responses
+            document.getElementById('total-responses').textContent = responses.length;
+
+            // Unique devices (count unique device_hash values)
+            // Use set to count unique devices, default to 0 if field missing
+            var uniqueDevices = new Set(responses.map(r => r.device_hash).filter(Boolean)).size;
+            document.getElementById('unique-devices').textContent = uniqueDevices;
+
+            // Last response time
+            if (responses.length > 0) {
+                // Sort by created_at desc to find latest
+                var sorted = [...responses].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                var lastResponse = new Date(sorted[0].created_at);
+                document.getElementById('last-response').textContent = getTimeAgo(lastResponse);
+            } else {
+                document.getElementById('last-response').textContent = 'Never';
+            }
+        }
+
+        // ============================================
+        // RENDER RESPONSES
+        // ============================================
+        function renderResponses(responses) {
+            var tbody = document.getElementById('responses-table-body');
+            tbody.innerHTML = '';
+
+            // Sort by latest first
+            var sortedResponses = [...responses].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            sortedResponses.forEach(function (response, index) {
+                // Calculate display number (Total - index) so #1 is the first ever response
+                var number = responses.length - index;
+                var row = createResponseRow(response, number);
+                tbody.appendChild(row);
+            });
+
+            // Update pagination info
+            document.getElementById('pagination-info').textContent =
+                'Showing all ' + responses.length + ' responses';
+        }
+
+        // ============================================
+        // CREATE RESPONSE ROW
+        // ============================================
+        function createResponseRow(response, number) {
+            var tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50 transition-colors';
+
+            var createdDate = new Date(response.created_at);
+            var timeAgo = getTimeAgo(createdDate);
+            var fullDate = createdDate.toLocaleString();
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    #${number}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" title="${fullDate}">
+                    ${timeAgo}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Response
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="viewResponseDetails('${response.id}')" 
+                            class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded-md transition-colors">
+                        View Data
+                    </button>
+                </td>
+            `;
+
+            return tr;
+        }
+
+        // ============================================
+        // SHOW EMPTY STATE
+        // ============================================
+        function showEmptyState() {
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('individual-view').classList.add('hidden');
+
+            // Reset stats
+            document.getElementById('total-responses').textContent = '0';
+            document.getElementById('unique-devices').textContent = '0';
+            document.getElementById('last-response').textContent = 'Never';
+        }
+
+        // ============================================
+        // SHOW ERROR
+        // ============================================
+        function showError(message) {
+            var emptyState = document.getElementById('empty-state');
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = `
+                <div class="text-center py-16">
+                    <svg class="w-24 h-24 mx-auto text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Error</h3>
+                    <a href="/dashboard/" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-block">
+                        Back to Dashboard
+                    </a>
+                </div>
+            `;
+
+            document.getElementById('individual-view').classList.add('hidden');
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return text;
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getTimeAgo(date) {
+            var seconds = Math.floor((new Date() - date) / 1000);
+            var intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+
+            for (var key in intervals) {
+                var interval = Math.floor(seconds / intervals[key]);
+                if (interval >= 1) {
+                    return interval + ' ' + key + (interval === 1 ? '' : 's') + ' ago';
+                }
+            }
+            return 'just now';
+        }
+
+        // ============================================
+        // VIEW RESPONSE DETAILS (MODAL)
+        // ============================================
+        function viewResponseDetails(responseId) {
+            window.Logger.debug('Responses', 'View details', responseId);
+
+            var response = window.responsesData.find(function (r) { return r.id === responseId; });
+            if (!response) {
+                window.Logger.error('Responses', 'Response not found');
+                return;
+            }
+
+            var form = window.currentFormData;
+
+            // Defensive Logging
+            // window.Logger.debug("Responses", "Form questions:", form ? form.questions : 'No form');
+            // window.Logger.debug("Responses", "Response answers:", response.answers);
+
+            var modalContent = document.getElementById('response-modal-content');
+            modalContent.innerHTML = '';
+
+            // Add Header
+            var date = new Date(response.created_at).toLocaleString();
+            var headerHtml = `
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900">Response Details</h3>
+                    <p class="text-sm text-gray-500">Submitted on ${date}</p>
+                </div>
+            `;
+
+            // Create container for answers
+            var container = document.createElement('div');
+            container.className = 'space-y-4';
+
+            var answers = response.answers || {};
+
+            // Normalize old nested structure (bulletproof fix)
+            if (answers.answers && typeof answers.answers === "object") {
+                answers = answers.answers;
+            }
+            // window.Logger.debug("Responses", "Normalized answers:", answers);
+
+            if (form && form.questions && form.questions.length > 0) {
+                form.questions.forEach(function (q) {
+                    var value = answers[q.id];
+                    var displayValue = "";
+
+                    if (value === undefined || value === null || value === '') {
+                        displayValue = '<em class="text-gray-400">No answer provided</em>';
+                    } else if (Array.isArray(value)) {
+                        displayValue = escapeHtml(value.join(', '));
+                    } else if (typeof value === 'object') {
+                        displayValue = escapeHtml(JSON.stringify(value));
+                    } else {
+                        displayValue = escapeHtml(String(value));
+                    }
+
+                    var block = document.createElement("div");
+                    block.className = "bg-gray-50 rounded-lg p-4 border border-gray-100";
+
+                    block.innerHTML = `
+                      <div class="text-sm font-medium text-gray-500 mb-1">${escapeHtml(q.question || q.text || "Untitled")}</div>
+                      <div class="text-base text-gray-900">${displayValue}</div>
+                    `;
+
+                    container.appendChild(block);
+                });
+            } else {
+                container.innerHTML = "<p class='text-gray-500 italic text-center'>No questions found in form definition.</p>";
+            }
+
+            modalContent.innerHTML = headerHtml;
+            modalContent.appendChild(container);
+
+            document.getElementById('response-modal').classList.remove('hidden');
+        }
+
+        function closeResponseModal() {
+            document.getElementById('response-modal').classList.add('hidden');
+        }
+
+        // Make functions globally available
+        window.viewResponseDetails = viewResponseDetails;
+        window.closeResponseModal = closeResponseModal;
+
+        // ============================================
+        // AUTH PROTECTION AND INITIALIZATION
+        // ============================================
+        async function initializeResponses() {
+            try {
+                window.Logger.info('Page', 'Initializing responses page');
+
+                // Wait for session to load
+                var response = await supabaseClient.auth.getSession();
+                var session = response.data.session;
+                var error = response.error;
+
+                if (error) {
+                    window.Logger.error('Auth', 'Error checking session', error);
+                    window.location.href = '/login/';
+                    return;
+                }
+
+                // Check if session exists
+                if (!session) {
+                    window.Logger.info('Auth', 'No session found, redirecting');
+                    window.location.href = '/login/';
+                    return;
+                }
+
+                // Session exists! User is authenticated
+                window.Logger.info('Auth', 'User authenticated');
+
+                // Get form ID from URL
+                var formId = getFormIdFromURL();
+                if (!formId) {
+                    window.Logger.error('Page', 'No form_id in URL');
+                    showError('No form ID provided. Please access this page from the dashboard.');
+                    return;
+                }
+
+                window.Logger.debug('Page', 'Form ID from URL', formId);
+
+                // Load form details and responses
+                await loadFormDetails(formId);
+                await loadResponses(formId);
+
+            } catch (error) {
+                window.Logger.error('Page', 'Initialization failed', error);
+
+                if (error.status === 403) {
+                    showError('Unauthorized: You do not have permission to view these responses.');
+                } else if (error.status === 404) {
+                    showError('Form not found.');
+                } else if (error.message && error.message.includes('No active session')) {
+                    window.location.href = '/login/';
+                } else {
+                    showError('Error loading responses: ' + (error.message || 'Unknown error'));
+                }
+            }
+        }
+
+        // Initialize on page load
+        initializeResponses();
+    </script>
+
+</body>
+
+</html>

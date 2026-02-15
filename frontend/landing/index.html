@@ -1,0 +1,624 @@
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EaseForm – Privacy-First Forms</title>
+    <meta name="description"
+        content="A privacy-first form builder that allows one response per device without email or login.">
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Teal for trust/cleanliness
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom subtle gradient animation */
+        .gradient-text {
+            background: linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes float-delayed {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(2deg);
+            }
+        }
+
+        .animate-float {
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+            animation: float-delayed 10s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+
+        @keyframes mesh-drift {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -60%) rotate(10deg) scale(1.1);
+            }
+        }
+
+        .animate-mesh-drift {
+            animation: mesh-drift 20s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-900 antialiased font-sans">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-1 group cursor-default">
+                    <span
+                        class="text-2xl font-bold tracking-tight text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-500 group-hover:to-blue-600 transition-all duration-300">Ease</span>
+                    <span
+                        class="text-2xl font-bold tracking-tight text-brand-500 group-hover:text-slate-900 transition-colors duration-300">Form</span>
+                    <div class="h-2 w-2 rounded-full bg-brand-500 mb-1 animate-pulse"></div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#problem"
+                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Why?</a>
+                    <a href="#how-it-works"
+                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">How it Works</a>
+                    <a href="#privacy"
+                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Privacy</a>
+                    <a href="/create/"
+                        class="px-5 py-2.5 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-full transition-all shadow-sm">
+                        Start Building
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-24 pb-12 lg:pt-28 lg:pb-0 overflow-hidden">
+        <!-- Background: Mesh Gradient + Noise -->
+        <div class="absolute inset-0 -z-20 h-full w-full bg-[#fafafa]">
+            <div
+                class="absolute top-0 left-0 w-full h-full opacity-40 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(13,148,136,0.3),rgba(255,255,255,0))]">
+            </div>
+            <div
+                class="absolute bottom-0 right-0 w-full h-full opacity-40 bg-[radial-gradient(ellipse_80%_80%_at_50%_120%,rgba(59,130,246,0.3),rgba(255,255,255,0))]">
+            </div>
+        </div>
+        <!-- Noise Texture Overlay -->
+        <div class="absolute inset-0 -z-10 opacity-[0.04] mix-blend-overlay pointer-events-none"
+            style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22 opacity=%221%22/%3E%3C/svg%3E');">
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <!-- Left Column: Content -->
+                <div class="text-center lg:text-left flex flex-col justify-center">
+                    <div
+                        class="inline-flex items-center justify-center lg:justify-start rounded-full border border-brand-200 bg-brand-50/80 backdrop-blur-sm px-4 py-1.5 text-sm font-semibold text-brand-700 mb-8 shadow-sm w-fit mx-auto lg:mx-0">
+                        <span
+                            class="flex h-2.5 w-2.5 rounded-full bg-brand-500 mr-2 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.5)]"></span>
+                        Privacy First Form Builder
+                    </div>
+
+                    <h1
+                        class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-[1.05]">
+                        Collect honest <br class="hidden lg:block"> responses. <br>
+                        <span class="gradient-text">No email. No sign-in.</span>
+                    </h1>
+
+                    <p class="mt-2 text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed font-medium">
+                        Remove friction and get higher completion rates with device-based validation.
+                        Built for anonymity, trusted by hosts.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4 mb-10">
+                        <a href="/create/"
+                            class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full shadow-lg hover:shadow-slate-900/20 transition-all transform hover:-translate-y-1 hover:scale-105">
+                            Create Your Form - <span class="font-normal opacity-90">It's Free</span>
+                        </a>
+                        <a href="#how-it-works"
+                            class="w-full sm:w-auto px-8 py-4 text-base font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-full transition-all flex items-center justify-center gap-2 group shadow-sm hover:shadow-md">
+                            <i data-lucide="play-circle"
+                                class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors"></i>
+                            See How It Works
+                        </a>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div
+                        class="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-slate-500 font-semibold bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-dashed border-slate-200 w-fit mx-auto lg:mx-0">
+                        <div class="flex items-center gap-2">
+                            <div class="p-1 bg-brand-100 rounded-full"><i data-lucide="shield-check"
+                                    class="w-3.5 h-3.5 text-brand-600"></i></div>
+                            <span>Anonymous by design</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="p-1 bg-brand-100 rounded-full"><i data-lucide="smartphone"
+                                    class="w-3.5 h-3.5 text-brand-600"></i></div>
+                            <span>No login required</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="p-1 bg-brand-100 rounded-full"><i data-lucide="check"
+                                    class="w-3.5 h-3.5 text-brand-600"></i></div>
+                            <span>Device-based validation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Visual Preview (Floating Glass Card) -->
+                <div
+                    class="relative hidden lg:flex h-full min-h-[500px] w-full perspective-1000 items-center justify-center">
+                    <!-- Abstract Background Bloom -->
+                    <div
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-gradient-to-tr from-brand-400/20 to-blue-500/20 blur-[90px] rounded-full animate-mesh-drift">
+                    </div>
+
+                    <!-- Floating Card Container -->
+                    <div class="relative w-[400px] animate-float z-10">
+                        <div
+                            class="bg-white/80 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-6 overflow-hidden relative group">
+                            <!-- Glass Sheen -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-tr from-white/40 to-transparent pointer-events-none">
+                            </div>
+
+                            <!-- Mock Header -->
+                            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                                <div class="h-3 w-28 bg-slate-200 rounded-full"></div>
+                                <div
+                                    class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    <span
+                                        class="text-[10px] uppercase tracking-wider font-bold text-emerald-600">Anonymous</span>
+                                </div>
+                            </div>
+
+                            <!-- Mock Question -->
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="h-4 w-3/4 bg-slate-800 rounded-md mb-2"></div>
+                                    <div class="h-3 w-1/2 bg-slate-400 rounded-md mb-4"></div>
+                                    <div class="space-y-3">
+                                        <div class="h-10 w-full border border-slate-200 rounded-xl bg-slate-50"></div>
+                                        <div class="h-20 w-full border border-slate-200 rounded-xl bg-slate-50"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Mock Rating Input -->
+                                <div>
+                                    <div class="h-3 w-1/3 bg-slate-800 rounded-md mb-3"></div>
+                                    <div class="flex justify-between px-2 gap-2">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-brand-100 border-2 border-brand-200 transition-transform transform group-hover:scale-110">
+                                        </div>
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-2 bloom">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mock Button -->
+                            <div class="mt-8">
+                                <div
+                                    class="w-full h-12 bg-slate-900 rounded-xl shadow-lg shadow-slate-900/20 flex items-center justify-center transition-transform transform group-hover:-translate-y-1">
+                                    <span class="text-white text-sm font-bold">Submit Response</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Decor: Rating badge -->
+                        <div
+                            class="absolute -right-12 top-8 w-24 h-24 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] rounded-2xl flex flex-col items-center justify-center border border-white/50 animate-float-delayed z-20 backdrop-blur-sm">
+                            <div class="text-brand-600 font-extrabold text-2xl">100%</div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Privacy</div>
+                        </div>
+
+                        <!-- Decor: Shield Icon -->
+                        <div
+                            class="absolute -left-8 bottom-16 w-20 h-20 bg-brand-500 shadow-[0_10px_40px_-5px_rgba(20,184,166,0.4)] rounded-2xl flex items-center justify-center animate-float z-20">
+                            <i data-lucide="shield-check" class="text-white w-10 h-10"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Proof (Mobile/Tablet only or below split) -->
+            <div
+                class="mt-20 pt-8 border-t border-slate-200/60 flex flex-col md:flex-row items-center justify-between gap-6 opacity-80">
+                <p class="text-sm text-slate-500">Trusted by agile teams at modern companies</p>
+                <div class="flex gap-8 grayscale opacity-50">
+                    <div class="h-6 w-20 bg-slate-300 rounded"></div>
+                    <div class="h-6 w-20 bg-slate-300 rounded"></div>
+                    <div class="h-6 w-20 bg-slate-300 rounded"></div>
+                    <div class="h-6 w-20 bg-slate-300 rounded"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="py-24 bg-white relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">The problem with traditional forms</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Standard form builders force users to identify
+                    themselves, killing your completion rates.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div
+                    class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors hover:shadow-sm">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="log-in" class="w-6 h-6 text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Forced Login Friction</h3>
+                    <p class="text-slate-600">
+                        "Sign in with Google to continue." This is the moment 40% of users abandon your form
+                        immediately.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div
+                    class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors hover:shadow-sm">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="eye-off" class="w-6 h-6 text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Privacy Concerns</h3>
+                    <p class="text-slate-600">
+                        Respondents worry their email will be tracked or spammed. Honesty drops when anonymity isn't
+                        guaranteed.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div
+                    class="p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors hover:shadow-sm">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6 text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Skewed Data</h3>
+                    <p class="text-slate-600">
+                        When people fear identification, they give "safe" answers instead of the truth, making your data
+                        useless.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="py-24 bg-slate-900 text-white overflow-hidden relative">
+        <!-- Background Glow -->
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-brand-900/20 blur-3xl rounded-full translate-x-1/3"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div
+                        class="inline-flex items-center px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 text-sm font-medium mb-6 border border-brand-500/30">
+                        The Smart Alternative
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 tracking-tight">Validation without violation.</h2>
+                    <p class="text-slate-300 text-lg mb-8 leading-relaxed">
+                        We use unique device fingerprinting to ensure individuality without ever asking for personal
+                        data.
+                        It's the perfect balance of data integrity and respondent privacy.
+                    </p>
+
+                    <ul class="space-y-6">
+                        <li class="flex items-start">
+                            <div
+                                class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-600 flex items-center justify-center mt-1 shadow-lg shadow-brand-500/20">
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-semibold text-white">One Response Per Device</h4>
+                                <p class="text-slate-400 text-sm">Prevents spam and duplicate submissions automatically.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div
+                                class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-600 flex items-center justify-center mt-1 shadow-lg shadow-brand-500/20">
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-semibold text-white">Zero PII Collection</h4>
+                                <p class="text-slate-400 text-sm">We don’t require emails or logins from respondents.
+                                </p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div
+                                class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-600 flex items-center justify-center mt-1 shadow-lg shadow-brand-500/20">
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-white"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-semibold text-white">Instant Trust</h4>
+                                <p class="text-slate-400 text-sm">Respondents see "Anonymous" badge and convert 3x
+                                    faster.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="relative group perspective-1000">
+                    <!-- Abstract visual representation of the form interface -->
+                    <div
+                        class="absolute -inset-4 bg-brand-500/20 blur-2xl rounded-full opacity-50 group-hover:opacity-75 transition duration-700">
+                    </div>
+                    <div
+                        class="relative bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-2xl transform transition-transform duration-500 hover:rotate-y-2 hover:rotate-x-2">
+                        <!-- Mock Header -->
+                        <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700">
+                            <div class="h-3 w-24 bg-slate-600 rounded-full"></div>
+                            <div
+                                class="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span class="text-xs text-emerald-400 font-medium">Anonymous Mode</span>
+                            </div>
+                        </div>
+                        <!-- Mock Question -->
+                        <div class="space-y-4">
+                            <div class="h-4 w-3/4 bg-slate-500 rounded-full mb-6"></div>
+
+                            <div
+                                class="p-4 border border-slate-600 rounded-lg flex items-center justify-between hover:bg-slate-700/50 cursor-pointer transition">
+                                <div class="h-3 w-32 bg-slate-600 rounded-full"></div>
+                                <div class="w-4 h-4 rounded-full border border-slate-500"></div>
+                            </div>
+                            <div
+                                class="p-4 border border-brand-500/50 bg-brand-500/10 rounded-lg flex items-center justify-between cursor-pointer transition">
+                                <div class="h-3 w-40 bg-slate-400 rounded-full"></div>
+                                <div class="w-4 h-4 rounded-full border-4 border-brand-500 bg-white"></div>
+                            </div>
+                            <div
+                                class="p-4 border border-slate-600 rounded-lg flex items-center justify-between hover:bg-slate-700/50 cursor-pointer transition">
+                                <div class="h-3 w-28 bg-slate-600 rounded-full"></div>
+                                <div class="w-4 h-4 rounded-full border border-slate-500"></div>
+                            </div>
+                        </div>
+                        <!-- Mock Button -->
+                        <div class="mt-8">
+                            <div
+                                class="w-full h-11 bg-brand-600 rounded-lg flex items-center justify-center text-white text-sm font-semibold shadow-lg shadow-brand-900/50">
+                                Submit Anonymously</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">How it works</h2>
+                <p class="mt-4 text-slate-600">Simpler than Google Forms, safer than Typeform.</p>
+            </div>
+
+            <div class="relative grid md:grid-cols-3 gap-12">
+                <!-- Connecting Line (Desktop) -->
+                <div class="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-slate-100 -z-10"></div>
+
+                <!-- Step 1 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div
+                        class="w-24 h-24 bg-white border-4 border-slate-50 group-hover:border-brand-100 rounded-full flex items-center justify-center mb-6 shadow-sm z-10 transition-colors">
+                        <i data-lucide="pen-tool" class="w-10 h-10 text-brand-600"></i>
+                    </div>
+                    <div
+                        class="absolute top-0 right-0 -mr-4 -mt-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">
+                        1</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Build</h3>
+                    <p class="text-slate-600 px-4">Create your questions in seconds. No complex logic, just clean
+                        questions.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div
+                        class="w-24 h-24 bg-white border-4 border-slate-50 group-hover:border-brand-100 rounded-full flex items-center justify-center mb-6 shadow-sm z-10 transition-colors">
+                        <i data-lucide="share-2" class="w-10 h-10 text-brand-600"></i>
+                    </div>
+                    <div
+                        class="absolute top-0 right-0 -mr-4 -mt-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">
+                        2</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Share</h3>
+                    <p class="text-slate-600 px-4">Send your unique link. It works perfectly on mobile, desktop, and
+                        tablets.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex flex-col items-center text-center group">
+                    <div
+                        class="w-24 h-24 bg-white border-4 border-slate-50 group-hover:border-brand-100 rounded-full flex items-center justify-center mb-6 shadow-sm z-10 transition-colors">
+                        <i data-lucide="database" class="w-10 h-10 text-brand-600"></i>
+                    </div>
+                    <div
+                        class="absolute top-0 right-0 -mr-4 -mt-2 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-sm border-4 border-white shadow-md">
+                        3</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Collect</h3>
+                    <p class="text-slate-600 px-4">Watch real, honest data roll in. CSV format download (Soon Lauch).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust & Privacy Section -->
+    <section id="privacy" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-3xl p-8 md:p-16 shadow-xl border border-slate-100 overflow-hidden">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-6">We don't want your data.</h2>
+                        <p class="text-slate-600 text-lg mb-8">
+                            Most form builders are data vacuums. We built an air-gapped system where the respondent's
+                            identity is anonymous by default.
+                        </p>
+
+                        <div class="grid sm:grid-cols-2 gap-6">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="user-x" class="w-6 h-6 text-brand-500"></i>
+                                <span class="font-medium text-slate-700">No User Accounts</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="cookie" class="w-6 h-6 text-brand-500"></i>
+                                <span class="font-medium text-slate-700">No Tracking Cookies</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="map-pin-off" class="w-6 h-6 text-brand-500"></i>
+                                <span class="font-medium text-slate-700">No IP Logging</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="lock" class="w-6 h-6 text-brand-500"></i>
+                                <span class="font-medium text-slate-700">Privacy-first by design</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 rounded-2xl p-8 text-center relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-brand-500/20 rounded-full blur-2xl -mr-16 -mt-16">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="inline-block p-4 rounded-full bg-green-500/20 mb-4 border border-green-500/20">
+                                <i data-lucide="shield" class="w-12 h-12 text-green-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-2">Privacy Guarantee</h3>
+                            <p class="text-slate-400 mb-6">
+                                We cannot see who responded. You cannot see who responded.
+                            </p>
+                            <a href="#privacy"
+                                class="text-brand-400 font-medium hover:text-brand-300 underline underline-offset-4 decoration-brand-500/50">Read
+                                our transparent privacy policy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA / Footer Hero -->
+    <section class="py-24 bg-gradient-to-br from-slate-50 to-brand-50/30 text-center border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                Ready to get the truth?
+            </h2>
+            <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+                Join 10,000+ organizations collecting better data today.
+                Free forever for personal use.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                <a href="/create/"
+                    class="px-10 py-5 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full shadow-lg shadow-slate-900/10 transition-transform transform hover:-translate-y-1">
+                    Make a Form Now
+                </a>
+            </div>
+
+            <p class="text-sm font-semibold text-brand-600 mb-6">Start building anonymous forms in seconds</p>
+
+            <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-slate-400">
+                <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> No credit card
+                    required</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> No login to
+                    start</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-1 group cursor-default mb-4 md:mb-0">
+                <span
+                    class="font-bold text-lg text-slate-700 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-500 group-hover:to-blue-600 transition-all duration-300">Ease</span>
+                <span
+                    class="font-bold text-lg text-brand-500 group-hover:text-slate-700 transition-colors duration-300">Form</span>
+                <div class="h-1.5 w-1.5 rounded-full bg-brand-500 mb-1 animate-pulse"></div>
+            </div>
+
+            <div class="flex space-x-8 text-sm text-slate-500">
+                <a href="#problem" class="hover:text-brand-600 transition">About</a>
+                <a href="#privacy" class="hover:text-brand-600 transition">Privacy</a>
+                <a href="#privacy" class="hover:text-brand-600 transition">Terms</a>
+                <a href="mailto:contact@easeform.com" class="hover:text-brand-600 transition">Contact</a>
+            </div>
+
+            <div class="mt-4 md:mt-0 text-sm text-slate-400">
+                &copy; 2026 EaseForm - Made by <a href="https://www.linkedin.com/in/praful-mohite" target="_blank"
+                    class="hover:text-brand-600 transition">Praful Mohite</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
