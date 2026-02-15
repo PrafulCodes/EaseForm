@@ -293,7 +293,7 @@
         // SHARE FORM FUNCTION
         // ============================================
         function shareForm(formId) {
-            // Ensure we point to /app/fill-form.html
+            // Point to the public forms page
             var shareUrl = window.location.origin + '/forms/?id=' + formId;
             window.Logger.info('Dashboard', 'Sharing form', formId);
             copyToClipboard(shareUrl, 'Form link copied to clipboard!');

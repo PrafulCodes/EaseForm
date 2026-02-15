@@ -173,10 +173,10 @@
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         Preview
                     </button>
-                    <button id="saveBtn"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
-                        Save Form
-                    </button>
+                    <a href="/dashboard/"
+                        class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">
+                        Dashboard
+                    </a>
                 </div>
             </div>
         </div>
@@ -473,12 +473,12 @@
                 if (error.status === 404) {
                     showToast('Form not found', 'error');
                     setTimeout(function () {
-                        window.location.href = '/app/dashboard.html';
+                        window.location.href = '/dashboard/';
                     }, 2000);
                 } else if (error.status === 403) {
                     showToast('You do not have permission to edit this form', 'error');
                     setTimeout(function () {
-                        window.location.href = '/app/dashboard.html';
+                        window.location.href = '/dashboard/';
                     }, 2000);
                 } else {
                     showToast('Failed to load form: ' + (error.message || 'Unknown error'), 'error');
@@ -904,7 +904,7 @@
 
                     // Redirect to dashboard after update
                     setTimeout(function () {
-                        window.location.href = '/app/dashboard.html';
+                        window.location.href = '/dashboard/';
                     }, 1500);
                 } else {
                     window.Logger.info('Form', 'Creating new form');

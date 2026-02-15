@@ -6,9 +6,9 @@
     <title>Redirecting...</title>
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <script>
-        // Redirect to the correct location in /app/ folder
-        // Preserves query parameters (like ?id=...)
-        window.location.href = "/app/fill-form.html" + window.location.search;
+        // Redirect to the correct location: /forms/?id=...
+        // This file is a fallback for legacy links
+        window.location.href = "/forms/" + window.location.search;
     </script>
 </head>
 
