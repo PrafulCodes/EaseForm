@@ -86,7 +86,11 @@ var API = (function () {
     // BASE API REQUEST
     // ============================================
 
-    var baseURL = window.API_BASE_URL || 'http://localhost:8000/api';
+    var baseURL = window.API_BASE_URL;
+    if (!baseURL) {
+        window.Logger.error('API', 'API_BASE_URL not defined', 'Check config.js generation');
+        throw new Error('Configuration Missing: API_BASE_URL is not defined.');
+    }
     var supabaseClient = window.supabaseClient;
 
     /**

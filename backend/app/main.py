@@ -54,24 +54,31 @@ from fastapi.middleware.gzip import GZipMiddleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Configure CORS - MUST be added before routes
-# In production, replace localhost origins with actual domain
-allowed_origins = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
+# Configure CORS
+allowed_origins = []
 
-# Add frontend_url from settings if different
-if settings.frontend_url not in allowed_origins:
-    allowed_origins.append(settings.frontend_url)
+# Production: Strict CORS
+if settings.environment == "production":
+    if settings.frontend_url:
+        allowed_origins.append(settings.frontend_url)
+        # Optional: Add www subdomain or other production variants if needed
+    else:
+        logger.warning("Production environment detected but FRONTEND_URL not set!")
 
-# Only add development origins in dev environment
-if settings.environment == "development":
+# Development: Allow localhost
+else:
     allowed_origins.extend([
-        "http://localhost:5500",  # Live Server
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:5500",
         "http://127.0.0.1:5500",
-        "http://localhost:3000",  # Common dev ports
+        "http://localhost:3000",
         "http://127.0.0.1:3000",
     ])
+    
+    # Also add the configured frontend_url in dev
+    if settings.frontend_url and settings.frontend_url not in allowed_origins:
+        allowed_origins.append(settings.frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
