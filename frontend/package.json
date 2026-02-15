@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend for EaseForm",
   "scripts": {
-    "build": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify && node ../generate-config.js",
+    "build": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify && node generate-config.js",
     "watch": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
     "dev": "npm run watch"
   },

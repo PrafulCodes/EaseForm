@@ -1,8 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// Read .env file if it exists
-const envPath = path.join(__dirname, '.env');
+// Read .env file from parent directory (for local dev) or current directory
+// Try parent first (standard repo structure), then current (if deployed in flat structure)
+let envPath = path.join(__dirname, '..', '.env');
+if (!fs.existsSync(envPath)) {
+    envPath = path.join(__dirname, '.env');
+}
+
 let envVars = {};
 
 if (fs.existsSync(envPath)) {
@@ -51,11 +56,11 @@ window.APP_CONFIG = {
 };
 `;
 
-// Write to frontend/config.js
-const configPath = path.join(__dirname, 'frontend', 'config.js');
+// Write to config.js in the current directory (frontend)
+const configPath = path.join(__dirname, 'config.js');
 fs.writeFileSync(configPath, configContent, 'utf8');
 
-console.log('✅ Config generated successfully from .env');
-console.log('📁 Written to: frontend/config.js');
+console.log('✅ Config generated successfully');
+console.log('📁 Written to: config.js');
 console.log('');
-console.log('⚠️  IMPORTANT: Add frontend/config.js to .gitignore to prevent committing secrets');
+console.log('⚠️  IMPORTANT: Add config.js to .gitignore to prevent committing secrets');
