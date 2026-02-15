@@ -39,7 +39,7 @@ window.SUPABASE_URL = '${getEnv('SUPABASE_URL')}';
 window.SUPABASE_ANON_KEY = '${getEnv('SUPABASE_ANON_KEY')}';
 
 // Backend API base URL
-window.API_BASE_URL = '${getEnv('API_BASE_URL', 'http://localhost:8000/api')}';
+window.API_BASE_URL = '${getEnv('API_BASE_URL', 'http://localhost:8000')}/api';
 
 // Export config object for backward compatibility
 window.APP_CONFIG = {
