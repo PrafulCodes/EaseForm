@@ -27,6 +27,25 @@
     <script src="../utils/cache.js"></script>
     <script src="../utils/auth.js"></script>
     <script src="../utils/api.js"></script>
+
+    <!-- Auth Guard - Must run early -->
+    <script>
+        // Immediate visual block
+        document.documentElement.style.display = 'none';
+    </script>
+    <script src="../utils/auth-guard.js"></script>
+    <script>
+        // Initialize Guard immediately
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.AuthGuard) {
+                window.AuthGuard.init();
+            } else {
+                console.error('AuthGuard not found');
+            }
+        });
+        // Correct display after guard loads styles
+        setTimeout(() => { document.documentElement.style.display = ''; }, 0);
+    </script>
     <style>
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -302,22 +321,17 @@
         // AUTH PROTECTION (ASYNC)
         // ============================================
         // CRITICAL: Wait for session to load before redirecting
+        // ============================================
+        // AUTH PROTECTION (ASYNC)
+        // ============================================
         async function initializeDashboard() {
             try {
-                // Wait for session to load
-                var response = await supabaseClient.auth.getSession();
-                var session = response.data.session;
-                var error = response.error;
+                // AuthGuard already verified session exists.
+                // We just need to get it to load data.
+                const { data: { session } } = await supabaseClient.auth.getSession();
 
-                if (error) {
-                    window.Logger.error('Auth', 'Error checking session', error);
-                    window.location.href = '/login/';
-                    return;
-                }
-
-                // Check if session exists
                 if (!session) {
-                    window.Logger.info('Auth', 'No session found, redirecting');
+                    // Should be handled by AuthGuard, but safety net
                     window.location.href = '/login/';
                     return;
                 }
@@ -326,7 +340,6 @@
                 window.Logger.info('Auth', 'User authenticated');
 
                 // Start both fetches properly
-                // We don't await loadUserProfile before starting loadForms anymore
                 var p1 = loadUserProfile(session.user);
                 var p2 = loadForms();
 

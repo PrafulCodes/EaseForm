@@ -24,6 +24,9 @@
     <script>
         // Tailwind config is now handled in tailwind.config.js
     </script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="landing-auth-helper.js"></script>
     <style>
         /* Custom subtle gradient animation */
         .gradient-text {
@@ -104,7 +107,7 @@
                         class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">How it Works</a>
                     <a href="#privacy"
                         class="text-sm font-medium text-slate-600 hover:text-brand-600 transition">Privacy</a>
-                    <a href="/create/"
+                    <a href="/create/" onclick="handleStartBuilding(event)"
                         class="px-5 py-2.5 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-full transition-all shadow-sm">
                         Start Building
                     </a>
@@ -152,7 +155,7 @@
                     </p>
 
                     <div class="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4 mb-10">
-                        <a href="/create/"
+                        <a href="/create/" onclick="handleStartBuilding(event)"
                             class="w-full sm:w-auto px-8 py-4 text-base font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full shadow-lg hover:shadow-slate-900/20 transition-all transform hover:-translate-y-1 hover:scale-105">
                             Create Your Form - <span class="font-normal opacity-90">It's Free</span>
                         </a>
@@ -556,7 +559,7 @@
                 Free forever for personal use.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-                <a href="/create/"
+                <a href="/create/" onclick="handleStartBuilding(event)"
                     class="px-10 py-5 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-full shadow-lg shadow-slate-900/10 transition-transform transform hover:-translate-y-1">
                     Make a Form Now
                 </a>
