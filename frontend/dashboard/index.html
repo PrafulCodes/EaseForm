@@ -326,18 +326,16 @@
         // ============================================
         async function initializeDashboard() {
             try {
-                // AuthGuard already verified session exists.
-                // We just need to get it to load data.
-                const { data: { session } } = await supabaseClient.auth.getSession();
-
-                if (!session) {
-                    // Should be handled by AuthGuard, but safety net
-                    window.location.href = '/login/';
-                    return;
+                // Wait for AuthGuard to confirm authentication
+                // This prevents race conditions where the script runs before AuthGuard finishes
+                if (window.AuthGuard) {
+                    const isAuthenticated = await window.AuthGuard.waitForAuth();
+                    if (!isAuthenticated) return; // AuthGuard handles redirect
                 }
 
                 // Session exists! Load data in parallel for speed
                 window.Logger.info('Auth', 'User authenticated');
+                const session = window.AuthGuard.session; // Use cached session
 
                 // Start both fetches properly
                 var p1 = loadUserProfile(session.user);
@@ -347,7 +345,7 @@
 
             } catch (error) {
                 window.Logger.error('Auth', 'Auth check failed', error);
-                window.location.href = '/login/';
+                // window.location.href = '/login/'; // AuthGuard handles this
             }
         }
 

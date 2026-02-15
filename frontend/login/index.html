@@ -293,30 +293,11 @@
         // ============================================
         // AUTH CHECK ON PAGE LOAD
         // ============================================
-        // Check if user is already logged in when page loads
-        // If they are, redirect them to the dashboard
-        function checkExistingSession() {
-            supabaseClient.auth.getSession().then(function (response) {
-                var session = response.data.session;
-                var error = response.error;
-
-                if (error) {
-                    Logger.error('Auth', 'Error checking session', error);
-                    return;
-                }
-
-                if (session) {
-                    // User is already logged in, redirect to dashboard
-                    Logger.info('Auth', 'User already authenticated, redirecting to dashboard');
-                    window.location.href = '/dashboard/';
-                }
-            }).catch(function (error) {
-                Logger.error('Auth', 'Session check failed', error);
-            });
-        }
-
-        // Run auth check on page load
-        checkExistingSession();
+        // AuthGuard handles redirection if already logged in.
+        // We just need to ensure the AuthGuard has initialized.
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.AuthGuard) window.AuthGuard.init();
+        });
 
         // ============================================
         // GOOGLE OAUTH SIGN IN
@@ -370,16 +351,9 @@
         // ============================================
         // AUTH STATE LISTENER
         // ============================================
-        // Listen for auth state changes (login, logout, token refresh)
-        supabaseClient.auth.onAuthStateChange(function (event, session) {
-            Logger.debug('Auth', 'Auth state changed', event);
+        // Handled by AuthGuard.js
+        // We do not need a local listener here as it would conflict.
 
-            if (event === 'SIGNED_IN' && session) {
-                // User just signed in, redirect to dashboard
-                Logger.info('Auth', 'User signed in', 'Redirecting to dashboard');
-                window.location.href = '/dashboard/';
-            }
-        });
     </script>
 </body>
 

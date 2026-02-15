@@ -714,22 +714,10 @@
             try {
                 window.Logger.info('Page', 'Initializing responses page');
 
-                // Wait for session to load
-                var response = await supabaseClient.auth.getSession();
-                var session = response.data.session;
-                var error = response.error;
-
-                if (error) {
-                    window.Logger.error('Auth', 'Error checking session', error);
-                    window.location.href = '/login/';
-                    return;
-                }
-
-                // Check if session exists
-                if (!session) {
-                    window.Logger.info('Auth', 'No session found, redirecting');
-                    window.location.href = '/login/';
-                    return;
+                // Wait for AuthGuard
+                if (window.AuthGuard) {
+                    const isAuthenticated = await window.AuthGuard.waitForAuth();
+                    if (!isAuthenticated) return;
                 }
 
                 // Session exists! User is authenticated

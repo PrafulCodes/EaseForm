@@ -12,60 +12,116 @@
     document.head.appendChild(style);
 
     window.AuthGuard = {
+        state: 'loading', // 'loading' | 'authenticated' | 'unauthenticated'
+        session: null,
+        user: null,
+        _readyResolvers: [],
+
         init: async function () {
-            // Wait for Supabase client to be available
+            // 1. Get Supabase Client
             if (!window.supabaseClient) {
-                // If this script runs before config.js finishes, wait a bit
-                // In production, script order should ensure config.js runs first
-                if (window.supabase) {
-                    // Try to initialize it if config is present but not client
-                    if (window.APP_CONFIG && window.supabase.createClient) {
-                        const { url, anonKey } = window.APP_CONFIG.supabase;
-                        window.supabaseClient = window.supabase.createClient(url, anonKey);
-                    }
+                if (window.APP_CONFIG && window.supabase && window.supabase.createClient) {
+                    const { url, anonKey } = window.APP_CONFIG.supabase;
+                    window.supabaseClient = window.supabase.createClient(url, anonKey);
                 }
             }
 
-            // Retry client check with a small delay if still missing (race condition safety)
             if (!window.supabaseClient) {
-                console.warn('AuthGuard: Supabase client not ready, retrying...');
+                // Retry if client not ready (race condition)
                 setTimeout(() => window.AuthGuard.init(), 50);
                 return;
             }
 
+            // 2. Setup Listener (Critical: handle state changes globally)
+            window.supabaseClient.auth.onAuthStateChange((event, session) => {
+                this._handleStateChange(event, session);
+            });
+
+            // 3. Initial Check
             try {
-                // 1. Check Session
-                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                this._handleStateChange('INITIAL_CHECK', session);
+            } catch (err) {
+                console.error('AuthGuard: Initial check error', err);
+                this._handleStateChange('INITIAL_CHECK_ERROR', null);
+            }
+        },
 
-                if (error || !session) {
-                    // UNATUTHENTICATED
-                    console.log('AuthGuard: No session, redirecting to login');
+        _handleStateChange: function (event, session) {
+            console.log(`AuthGuard: State Change [${event}]`, session ? 'Session Active' : 'No Session');
 
-                    // Store return URL if not already stored
-                    if (window.location.pathname !== '/login/' && window.location.pathname !== '/') {
-                        sessionStorage.setItem('returnTo', window.location.href);
-                    }
+            this.session = session;
+            this.user = session ? session.user : null;
+            const previousState = this.state;
 
-                    window.location.href = '/login/';
-                    return;
-                }
+            if (session) {
+                this.state = 'authenticated';
 
-                // AUTHENTICATED
-                console.log('AuthGuard: Session confirmed');
-
-                // If we are on login page, redirect to dashboard
+                // If on login page, redirect to dashboard or returnUrl
                 if (window.location.pathname.includes('/login')) {
-                    window.location.href = '/dashboard/';
+                    this._handleLoginRedirect();
                     return;
                 }
 
-                // Show content
+                // On protected pages, just show content
                 this.showContent();
 
-            } catch (err) {
-                console.error('AuthGuard: Error', err);
-                window.location.href = '/login/';
+            } else {
+                this.state = 'unauthenticated';
+
+                // If on protected page, redirect to login
+                if (!window.location.pathname.includes('/login') && window.location.pathname !== '/') {
+                    this._handleLogoutRedirect();
+                    return;
+                }
+
+                // If on login or landing, show content
+                this.showContent();
             }
+
+            // Resolve any waiters
+            if (previousState === 'loading' && this.state !== 'loading') {
+                this._resolveReady();
+            }
+        },
+
+        _handleLoginRedirect: function () {
+            // Check for redirect param
+            const params = new URLSearchParams(window.location.search);
+            const redirectParam = params.get('redirect');
+            const returnTo = sessionStorage.getItem('returnTo');
+
+            let target = '/dashboard/';
+            if (redirectParam) {
+                target = redirectParam;
+            } else if (returnTo) {
+                target = returnTo;
+                sessionStorage.removeItem('returnTo');
+            }
+
+            console.log('AuthGuard: Redirecting to', target);
+            window.location.href = target;
+        },
+
+        _handleLogoutRedirect: function () {
+            console.log('AuthGuard: Redirecting to login');
+            sessionStorage.setItem('returnTo', window.location.href);
+            window.location.href = '/login/';
+        },
+
+        // Helper for other scripts to wait for auth
+        waitForAuth: function () {
+            if (this.state !== 'loading') {
+                return Promise.resolve(this.state === 'authenticated');
+            }
+            return new Promise(resolve => {
+                this._readyResolvers.push(() => resolve(this.state === 'authenticated'));
+            });
+        },
+
+        _resolveReady: function () {
+            this._readyResolvers.forEach(resolve => resolve(this.state === 'authenticated'));
+            this._readyResolvers = [];
         },
 
         showContent: function () {

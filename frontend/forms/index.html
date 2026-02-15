@@ -19,17 +19,7 @@
     <script src="../utils/cache.js"></script>
     <script src="../utils/auth.js"></script>
 
-    <!-- Auth Guard - Must run early -->
-    <script>
-        document.documentElement.style.display = 'none';
-    </script>
-    <script src="../utils/auth-guard.js"></script>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.AuthGuard) window.AuthGuard.init();
-        });
-        setTimeout(() => { document.documentElement.style.display = ''; }, 0);
-    </script>
+    <!-- Auth Guard - REMOVED for public page -->
     <script src="../utils/api.js"></script>
 
     <style>
