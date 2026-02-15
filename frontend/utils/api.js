@@ -149,7 +149,7 @@ var API = (function () {
         try {
             // Setup timeout
             var controller = new AbortController();
-            var timeoutId = setTimeout(function () { controller.abort(); }, 10000); // 10s timeout
+            var timeoutId = setTimeout(function () { controller.abort(); }, 60000); // 60s timeout for Render cold starts
             config.signal = controller.signal;
 
             var response = await fetch(url, config);
