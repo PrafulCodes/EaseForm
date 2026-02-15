@@ -91,6 +91,8 @@ var API = (function () {
         window.Logger.error('API', 'API_BASE_URL not defined', 'Check config.js generation');
         throw new Error('Configuration Missing: API_BASE_URL is not defined.');
     }
+
+    // Client should be ready if loaded in correct order
     var supabaseClient = window.supabaseClient;
 
     /**

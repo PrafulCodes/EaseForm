@@ -1,11 +1,8 @@
 
 // Initialize Supabase client for the landing page
-if (typeof supabase !== 'undefined' && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-    if (!window.supabaseClient) {
-        window.supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-} else {
-    console.error('Supabase library or configuration not found');
+// Relies on supabase-client.js being loaded before this script
+if (!window.supabaseClient) {
+    console.warn('Landing Helper: Supabase client not initialized yet.');
 }
 
 async function handleStartBuilding(e) {

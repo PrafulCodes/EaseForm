@@ -18,19 +18,18 @@
         _readyResolvers: [],
 
         init: async function () {
-            // 1. Get Supabase Client
+            // 1. Wait for Supabase Client
             if (!window.supabaseClient) {
-                if (window.APP_CONFIG && window.supabase && window.supabase.createClient) {
-                    const { url, anonKey } = window.APP_CONFIG.supabase;
-                    window.supabaseClient = window.supabase.createClient(url, anonKey);
+                console.warn('AuthGuard: Supabase client not ready, waiting...');
+                try {
+                    await window.waitForSupabase();
+                } catch (e) {
+                    console.error('AuthGuard: Failed to wait for Supabase client', e);
+                    return;
                 }
             }
 
-            if (!window.supabaseClient) {
-                // Retry if client not ready (race condition)
-                setTimeout(() => window.AuthGuard.init(), 50);
-                return;
-            }
+
 
             // 2. Setup Listener (Critical: handle state changes globally)
             window.supabaseClient.auth.onAuthStateChange((event, session) => {

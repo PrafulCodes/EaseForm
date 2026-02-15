@@ -4,15 +4,13 @@
 // Helper functions for Supabase Auth operations
 // Following EaseForm's database architecture rules
 
-// Get Supabase client from config
+// Get Supabase client from global scope (initialized by supabase-client.js)
 function getSupabaseClient() {
-    if (!window.APP_CONFIG) {
-        window.Logger.error('AUTH', 'APP_CONFIG not loaded. Make sure config.js is included.');
+    if (!window.supabaseClient) {
+        window.Logger ? window.Logger.error('AUTH', 'Supabase client not initialized') : console.error('Supabase client not initialized');
         return null;
     }
-
-    const { url, anonKey } = window.APP_CONFIG.supabase;
-    return window.supabase.createClient(url, anonKey);
+    return window.supabaseClient;
 }
 
 // ============================================

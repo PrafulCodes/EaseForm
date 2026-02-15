@@ -17,6 +17,7 @@
     <!-- Core scripts -->
     <script src="../config.js"></script>
     <script src="../utils/logger.js"></script>
+    <script src="../utils/supabase-client.js"></script>
     <script src="../utils/auth.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -242,26 +243,12 @@
         }
 
 
-        // ============================================
-        // SUPABASE CONFIGURATION
-        // ============================================
-        // Wait for config.js to load, then initialize Supabase
-        // Credentials are loaded from window.SUPABASE_URL and window.SUPABASE_ANON_KEY
-        // NEVER hardcode credentials in this file
-
-        // Get configuration from window (set by config.js)
-        var SUPABASE_URL = window.SUPABASE_URL;
-        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
-
-        // Validate configuration
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY ||
-            SUPABASE_URL.includes('YOUR_') || SUPABASE_ANON_KEY.includes('YOUR_')) {
-            Logger.error('Supabase', 'Supabase credentials not configured. Please update config.js with your credentials.');
-            showError('Configuration error. Please update config.js with your Supabase credentials.');
+        // Initialize Supabase client (using global instance)
+        if (!window.supabaseClient) {
+            Logger.error('Init', 'Supabase client not loaded');
+            showError('System Error: Supabase client not initialized');
         }
-
-        // Initialize Supabase client (using UMD build from unpkg CDN)
-        var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var supabaseClient = window.supabaseClient;
 
         // ============================================
         // DOM ELEMENTS
